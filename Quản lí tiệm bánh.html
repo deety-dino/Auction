@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>BakeManage - Quản lý sản xuất cho Home-baker (Firebase)</title>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #fef9e6 0%, #fff5e8 100%);
+            color: #3e2a1f;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Login Screen */
+        .login-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #c47a44 0%, #8b5a2e 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .login-box {
+            background: white;
+            padding: 40px;
+            border-radius: 32px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+
+        .login-box h2 {
+            text-align: center;
+            color: #c47a44;
+            margin-bottom: 25px;
+        }
+
+        .login-box input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #e2c7aa;
+            border-radius: 24px;
+            font-size: 16px;
+        }
+
+        .login-box button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 15px;
+            background: #c47a44;
+            color: white;
+            border: none;
+            border-radius: 24px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .login-box button:hover {
+            background: #a55d2e;
+        }
+
+        .login-box button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .switch-mode {
+            text-align: center;
+            margin-top: 15px;
+            color: #7b4a2e;
+            cursor: pointer;
+        }
+
+        .switch-mode:hover {
+            text-decoration: underline;
+        }
+
+        .error-msg {
+            color: #e74c3c;
+            font-size: 14px;
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        .success-msg {
+            color: #27ae60;
+            font-size: 14px;
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        /* Main App */
+        .main-app {
+            display: none;
+        }
+
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0d5b0;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logout-btn {
+            background: #e74c3c;
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-size: 14px;
+        }
+
+        .logout-btn:hover {
+            background: #c0392b;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            color: #c47a44;
+        }
+
+        .sub {
+            color: #b97f55;
+            font-style: italic;
+        }
+
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f0d5b0;
+            padding-bottom: 10px;
+        }
+
+        .tab-btn {
+            background: #f7e5cf;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #7b4a2e;
+            transition: 0.2s;
+        }
+
+        .tab-btn.active {
+            background: #c47a44;
+            color: white;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .tab-pane {
+            display: none;
+            animation: fade 0.2s ease;
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
+
+        @keyframes fade {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .card {
+            background: white;
+            border-radius: 24px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+            border: 1px solid #ffe2c4;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #5a3a28;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #e2c7aa;
+            border-radius: 16px;
+            font-size: 14px;
+            background: #fffcf8;
+        }
+
+        button {
+            background: #c47a44;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            background: #a55d2e;
+            transform: scale(0.98);
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #c47a44;
+            color: #c47a44;
+        }
+
+        .btn-outline:hover {
+            background: #c47a44;
+            color: white;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 12px 8px;
+            border-bottom: 1px solid #f0e0ce;
+        }
+
+        .warning {
+            background: #fff0e0;
+            border-left: 5px solid #e67e22;
+            padding: 12px;
+            border-radius: 12px;
+            margin: 15px 0;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #b97f55;
+        }
+
+        .flex-btns {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        @media (max-width: 700px) {
+            body { padding: 12px; }
+            th, td { font-size: 13px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen" class="login-screen">
+        <div class="login-box">
+            <h2>🍰 BakeManage</h2>
+            <div id="loginForm">
+                <input type="email" id="loginEmail" placeholder="Email" autocomplete="off">
+                <input type="password" id="loginPassword" placeholder="Mật khẩu">
+                <button id="loginBtn">Đăng nhập</button>
+                <div class="switch-mode" onclick="showRegister()">Chưa có tài khoản? Đăng ký miễn phí</div>
+                <div class="switch-mode" onclick="showForgotPassword()">Quên mật khẩu?</div>
+            </div>
+            <div id="registerForm" style="display:none;">
+                <input type="email" id="regEmail" placeholder="Email">
+                <input type="password" id="regPassword" placeholder="Mật khẩu (tối thiểu 6 ký tự)">
+                <button id="registerBtn">Đăng ký</button>
+                <div class="switch-mode" onclick="showLogin()">Đã có tài khoản? Đăng nhập</div>
+            </div>
+            <div id="forgotForm" style="display:none;">
+                <input type="email" id="forgotEmail" placeholder="Email của bạn">
+                <button id="resetPasswordBtn">Gửi email đặt lại mật khẩu</button>
+                <div class="switch-mode" onclick="showLogin()">Quay lại đăng nhập</div>
+            </div>
+            <div id="authMessage" class="error-msg"></div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="mainApp" class="main-app">
+        <div class="container">
+            <div class="app-header">
+                <div>
+                    <h1>🍰 BakeManage</h1>
+                    <div class="sub">Quản lý nguyên liệu tồn kho & tối ưu sản xuất</div>
+                </div>
+                <div class="user-info">
+                    <span>👤 <span id="currentUser"></span></span>
+                    <button class="logout-btn" onclick="logout()">Đăng xuất</button>
+                </div>
+            </div>
+
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="ingredients">🥄 Nguyên liệu</button>
+                <button class="tab-btn" data-tab="recipes">📝 Công thức</button>
+                <button class="tab-btn" data-tab="production">⚙️ Sản xuất & Tồn kho</button>
+                <button class="tab-btn" data-tab="profit">📊 Báo cáo lợi nhuận</button>
+            </div>
+
+            <!-- Tab Nguyên Liệu -->
+            <div id="ingredients" class="tab-pane active">
+                <div class="card">
+                    <h3>➕ Nhập nguyên liệu mới (hỗ trợ gram/ml, giá lẻ)</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div class="form-group"><label>Tên nguyên liệu</label><input type="text" id="ingName" placeholder="VD: Bột mì, Đường, Bơ..."></div>
+                        <div class="form-group"><label>Số lượng (gram/ml)</label><input type="number" id="ingQty" placeholder="315" step="any"></div>
+                        <div class="form-group"><label>Giá tiền (VNĐ)</label><input type="number" id="ingPrice" placeholder="85000"></div>
+                        <div class="form-group"><label>Đơn vị</label><select id="ingUnit"><option value="g">gram (g)</option><option value="ml">ml</option></select></div>
+                    </div>
+                    <button id="addIngredientBtn">➕ Thêm nguyên liệu</button>
+                </div>
+
+                <div class="card">
+                    <h3>📦 Danh sách nguyên liệu tồn kho + Giá/g (vi mô)</h3>
+                    <div id="ingredientsLoading" class="loading">Đang tải...</div>
+                    <table id="ingredientsTable" style="display:none;">
+                        <thead><tr><th>Tên</th><th>Tồn (g/ml)</th><th>Giá/g (đ)</th><th>Thao tác</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab Công thức -->
+            <div id="recipes" class="tab-pane">
+                <div class="card">
+                    <h3>🍪 Tạo / Cập nhật công thức sản phẩm</h3>
+                    <div class="form-group"><label>Tên sản phẩm</label><input type="text" id="productName" placeholder="VD: Cookies Matcha, Bánh nho"></div>
+                    <div class="form-group"><label>Nguyên liệu (JSON)</label>
+                        <textarea id="recipeIngredients" rows="3" placeholder='{"Bột mì": 50, "Đường": 20, "Bơ": 30}' style="font-family: monospace;"></textarea>
+                        <small>Ví dụ: {"Bột mì": 50, "Đường": 20, "Nho khô": 10} (gram mỗi cái)</small>
+                    </div>
+                    <button id="saveRecipeBtn">💾 Lưu công thức</button>
+                </div>
+                <div class="card">
+                    <h3>📖 Các công thức đã lưu</h3>
+                    <div id="recipesList" class="loading">Đang tải...</div>
+                </div>
+            </div>
+
+            <!-- Tab Sản xuất & Tồn kho -->
+            <div id="production" class="tab-pane">
+                <div class="card">
+                    <h3>⚡ Tính nguyên liệu cần cho số lượng sản phẩm (xuôi)</h3>
+                    <div class="form-group"><label>Chọn sản phẩm</label><select id="prodSelect"></select></div>
+                    <div class="form-group"><label>Số lượng cần làm</label><input type="number" id="prodQty" value="1" step="1"></div>
+                    <button id="calcNeedBtn">🔢 Tính nguyên liệu cần & kiểm tra tồn kho</button>
+                    <div id="needResult" class="warning" style="display:none;"></div>
+                    <button id="confirmDeductionBtn" style="background:#2e7d32;">✅ Xác nhận sản xuất (trừ kho)</button>
+                </div>
+
+                <div class="card">
+                    <h3>🔄 Ngược lại: Với nguyên liệu hiện tại -> tối đa bao nhiêu sản phẩm?</h3>
+                    <div class="form-group"><label>Chọn sản phẩm</label><select id="maxProdSelect"></select></div>
+                    <button id="calcMaxBtn">📈 Tính số lượng tối đa có thể sản xuất</button>
+                    <div id="maxResult" class="warning"></div>
+                </div>
+
+                <div class="card">
+                    <h3>📉 Tồn kho hiện tại</h3>
+                    <div id="stockLoading" class="loading">Đang tải...</div>
+                    <table id="stockTable" style="display:none;"><thead><tr><th>Nguyên liệu</th><th>Tồn hiện tại</th></tr></thead><tbody></tbody></table>
+                    <div class="flex-btns"><button id="resetDemoBtn" class="btn-outline">🔄 Reset dữ liệu mẫu</button></div>
+                </div>
+            </div>
+
+            <!-- Tab Lợi nhuận -->
+            <div id="profit" class="tab-pane">
+                <div class="card">
+                    <h3>💰 Ghi nhận doanh thu & tính lợi nhuận</h3>
+                    <div class="form-group"><label>Chọn sản phẩm</label><select id="profitProductSelect"></select></div>
+                    <div class="form-group"><label>Số lượng bán</label><input type="number" id="soldQty" value="1" step="1"></div>
+                    <div class="form-group"><label>Giá bán (VNĐ / 1 sản phẩm)</label><input type="number" id="sellPrice" placeholder="VD: 50000"></div>
+                    <button id="recordSaleBtn">📝 Ghi nhận bán hàng</button>
+                </div>
+                <div class="card">
+                    <h3>📈 Báo cáo tổng hợp</h3>
+                    <div id="profitReport" class="loading">Đang tải...</div>
+                    <button id="resetSalesBtn" class="btn-outline">🗑️ Xóa lịch sử bán hàng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Firebase config
+        const firebaseConfig = {
+            apiKey: "AIzaSyBFcEPwl5YBSqonV9k1xzbQ65bS5ue6kmc",
+            authDomain: "bakemanage.firebaseapp.com",
+            projectId: "bakemanage",
+            storageBucket: "bakemanage.firebasestorage.app",
+            messagingSenderId: "708786645275",
+            appId: "1:708786645275:web:d17f99531ebd77bd438bbe",
+            measurementId: "G-BB4N5FYJLT"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        let currentUser = null;
+        let currentUserId = null;
+
+        // Sample data
+        function getSampleIngredients() {
+            return [
+                { name: "Bột mì", quantity: 1500, unit: "g", pricePerUnit: 0.02 },
+                { name: "Đường", quantity: 800, unit: "g", pricePerUnit: 0.025 },
+                { name: "Nho khô", quantity: 200, unit: "g", pricePerUnit: 0.15 },
+                { name: "Bơ", quantity: 500, unit: "g", pricePerUnit: 0.12 }
+            ];
+        }
+
+        function getSampleRecipes() {
+            return [
+                { name: "Cookies Matcha", ingredients: { "Bột mì": 50, "Đường": 20, "Bơ": 25 } },
+                { name: "Bánh nho", ingredients: { "Bột mì": 60, "Đường": 15, "Nho khô": 12, "Bơ": 20 } }
+            ];
+        }
+
+        // Auth functions
+        window.showRegister = function() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('registerForm').style.display = 'block';
+            document.getElementById('forgotForm').style.display = 'none';
+            document.getElementById('authMessage').innerText = '';
+        }
+
+        window.showLogin = function() {
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('registerForm').style.display = 'none';
+            document.getElementById('forgotForm').style.display = 'none';
+            document.getElementById('authMessage').innerText = '';
+        }
+
+        window.showForgotPassword = function() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('registerForm').style.display = 'none';
+            document.getElementById('forgotForm').style.display = 'block';
+            document.getElementById('authMessage').innerText = '';
+        }
+
+        // Đăng ký
+        document.getElementById('registerBtn')?.addEventListener('click', async () => {
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+            const msgDiv = document.getElementById('authMessage');
+            
+            if (!email || !password) {
+                msgDiv.innerText = 'Vui lòng nhập email và mật khẩu!';
+                return;
+            }
+            if (password.length < 6) {
+                msgDiv.innerText = 'Mật khẩu phải có ít nhất 6 ký tự!';
+                return;
+            }
+
+            try {
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                // Tạo dữ liệu mẫu cho user mới
+                await db.collection('users').doc(userCredential.user.uid).set({
+                    ingredients: getSampleIngredients(),
+                    recipes: getSampleRecipes(),
+                    salesHistory: []
+                });
+                msgDiv.style.color = '#27ae60';
+                msgDiv.innerText = 'Đăng ký thành công! Đang chuyển hướng...';
+                setTimeout(() => {
+                    document.getElementById('loginScreen').style.display = 'none';
+                    document.getElementById('mainApp').style.display = 'block';
+                    loadUserData(userCredential.user);
+                }, 1000);
+            } catch (error) {
+                msgDiv.style.color = '#e74c3c';
+                if (error.code === 'auth/email-already-in-use') {
+                    msgDiv.innerText = 'Email đã được đăng ký!';
+                } else {
+                    msgDiv.innerText = error.message;
+                }
+            }
+        });
+
+        // Đăng nhập
+        document.getElementById('loginBtn')?.addEventListener('click', async () => {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const msgDiv = document.getElementById('authMessage');
+
+            if (!email || !password) {
+                msgDiv.innerText = 'Vui lòng nhập email và mật khẩu!';
+                return;
+            }
+
+            try {
+                const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+                loadUserData(userCredential.user);
+            } catch (error) {
+                msgDiv.style.color = '#e74c3c';
+                if (error.code === 'auth/user-not-found') {
+                    msgDiv.innerText = 'Không tìm thấy tài khoản!';
+                } else if (error.code === 'auth/wrong-password') {
+                    msgDiv.innerText = 'Sai mật khẩu!';
+                } else {
+                    msgDiv.innerText = error.message;
+                }
+            }
+        });
+
+        // Quên mật khẩu
+        document.getElementById('resetPasswordBtn')?.addEventListener('click', async () => {
+            const email = document.getElementById('forgotEmail').value;
+            const msgDiv = document.getElementById('authMessage');
+
+            if (!email) {
+                msgDiv.innerText = 'Vui lòng nhập email!';
+                return;
+            }
+
+            try {
+                await auth.sendPasswordResetEmail(email);
+                msgDiv.style.color = '#27ae60';
+                msgDiv.innerText = 'Email đặt lại mật khẩu đã được gửi! Kiểm tra hộp thư của bạn.';
+            } catch (error) {
+                msgDiv.style.color = '#e74c3c';
+                msgDiv.innerText = error.message;
+            }
+        });
+
+        // Đăng xuất
+        window.logout = async function() {
+            await auth.signOut();
+            currentUser = null;
+            currentUserId = null;
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('mainApp').style.display = 'none';
+            document.getElementById('loginEmail').value = '';
+            document.getElementById('loginPassword').value = '';
+        }
+
+        // Load user data from Firestore
+        let userIngredients = [];
+        let userRecipes = [];
+        let userSalesHistory = [];
+
+        async function loadUserData(user) {
+            currentUser = user;
+            currentUserId = user.uid;
+            document.getElementById('currentUser').innerText = user.email;
+            
+            const userDoc = await db.collection('users').doc(currentUserId).get();
+            if (userDoc.exists) {
+                const data = userDoc.data();
+                userIngredients = data.ingredients || [];
+                userRecipes = data.recipes || [];
+                userSalesHistory = data.salesHistory || [];
+            } else {
+                // Tạo mới nếu chưa có
+                userIngredients = getSampleIngredients();
+                userRecipes = getSampleRecipes();
+                userSalesHistory = [];
+                await saveAllData();
+            }
+            renderAll();
+        }
+
+        async function saveAllData() {
+            if (!currentUserId) return;
+            await db.collection('users').doc(currentUserId).set({
+                ingredients: userIngredients,
+                recipes: userRecipes,
+                salesHistory: userSalesHistory
+            });
+        }
+
+        // Helper functions
+        function addIngredient(name, qty, price, unit) {
+            if(!name || qty<=0 || price<0) return false;
+            const existing = userIngredients.find(i => i.name.toLowerCase() === name.toLowerCase());
+            const pricePerGram = price / qty;
+            if(existing) {
+                const oldTotalCost = existing.quantity * existing.pricePerUnit;
+                const newTotalCost = oldTotalCost + (qty * pricePerGram);
+                const newQty = existing.quantity + qty;
+                existing.quantity = newQty;
+                existing.pricePerUnit = newTotalCost / newQty;
+                existing.unit = unit;
+            } else {
+                userIngredients.push({
+                    id: Date.now(),
+                    name: name,
+                    quantity: qty,
+                    unit: unit,
+                    pricePerUnit: pricePerGram
+                });
+            }
+            saveAllData();
+            return true;
+        }
+
+        function produceProduct(recipe, quantity) {
+            const needed = {};
+            for(let [ingName, gram] of Object.entries(recipe.ingredients)) {
+                needed[ingName] = gram * quantity;
+            }
+            let canProduce = true;
+            let shortages = [];
+            for(let [ingName, need] of Object.entries(needed)) {
+                const ing = userIngredients.find(i => i.name === ingName);
+                if(!ing || ing.quantity < need) {
+                    canProduce = false;
+                    shortages.push({ name: ingName, need: need, current: ing ? ing.quantity : 0 });
+                }
+            }
+            if(!canProduce) return { success: false, shortages };
+            for(let [ingName, need] of Object.entries(needed)) {
+                const ing = userIngredients.find(i => i.name === ingName);
+                ing.quantity -= need;
+            }
+            saveAllData();
+            return { success: true };
+        }
+
+        function getProductCost(recipe) {
+            let totalCost = 0;
+            for(let [ingName, gram] of Object.entries(recipe.ingredients)) {
+                const ing = userIngredients.find(i => i.name === ingName);
+                if(ing) totalCost += gram * ing.pricePerUnit;
+                else return null;
+            }
+            return totalCost;
+        }
+
+        function maxPossible(recipe) {
+            let maxProd = Infinity;
+            for(let [ingName, gram] of Object.entries(recipe.ingredients)) {
+                const ing = userIngredients.find(i => i.name === ingName);
+                if(!ing) return 0;
+                const possible = Math.floor(ing.quantity / gram);
+                if(possible < maxProd) maxProd = possible;
+            }
+            return maxProd === Infinity ? 0 : maxProd;
+        }
+
+        // UI Render
+        function renderIngredientsTable() {
+            const tbody = document.querySelector("#ingredientsTable tbody");
+            const table = document.getElementById("ingredientsTable");
+            const loading = document.getElementById("ingredientsLoading");
+            
+            if(!tbody) return;
+            
+            if(userIngredients.length === 0) {
+                loading.style.display = "block";
+                table.style.display = "none";
+                loading.innerHTML = "Chưa có nguyên liệu. Hãy thêm nguyên liệu mới!";
+                return;
+            }
+            
+            loading.style.display = "none";
+            table.style.display = "table";
+            tbody.innerHTML = "";
+            
+            userIngredients.forEach(ing => {
+                const row = tbody.insertRow();
+                row.insertCell(0).innerText = ing.name;
+                row.insertCell(1).innerText = `${ing.quantity.toFixed(1)} ${ing.unit}`;
+                row.insertCell(2).innerText = `${(ing.pricePerUnit).toFixed(2)} đ/${ing.unit}`;
+                const btnCell = row.insertCell(3);
+                const delBtn = document.createElement("button");
+                delBtn.innerText = "Xóa";
+                delBtn.style.background = "#b56531";
+                delBtn.onclick = async () => {
+                    if(confirm(`Xóa ${ing.name}?`)) {
+                        userIngredients = userIngredients.filter(i => i.id !== ing.id);
+                        await saveAllData();
+                        renderIngredientsTable();
+                        renderStockTable();
+                        updateAllSelects();
+                    }
+                };
+                btnCell.appendChild(delBtn);
+            });
+        }
+
+        function renderRecipesList() {
+            const container = document.getElementById("recipesList");
+            if(!container) return;
+            
+            if(userRecipes.length === 0) {
+                container.innerHTML = "<p>Chưa có công thức. Hãy thêm công thức mới.</p>";
+                return;
+            }
+            
+            let html = "<div style='display:flex;flex-wrap:wrap;gap:15px;'>";
+            userRecipes.forEach(rec => {
+                let cost = getProductCost(rec);
+                html += `<div style='background:#fef2e6;border-radius:20px;padding:12px;width:240px;'>
+                            <strong>🍰 ${rec.name}</strong><br/>
+                            <small>Thành phần: ${Object.entries(rec.ingredients).map(([k,v])=>`${k}:${v}g`).join(", ")}</small><br/>
+                            <span>💵 Cost hiện tại: ${cost ? cost.toFixed(0)+"đ" : "thiếu nguyên liệu"}</span><br/>
+                            <button class='delete-recipe' data-id='${rec.id || rec.name}' style='margin-top:8px;background:#a55d2e;'>Xóa</button>
+                        </div>`;
+            });
+            html += "</div>";
+            container.innerHTML = html;
+            
+            document.querySelectorAll('.delete-recipe').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    const name = btn.getAttribute('data-id');
+                    userRecipes = userRecipes.filter(r => (r.id || r.name) != name);
+                    await saveAllData();
+                    renderRecipesList();
+                    updateAllSelects();
+                });
+            });
+        }
+
+        function updateAllSelects() {
+            const selects = ['prodSelect', 'maxProdSelect', 'profitProductSelect'];
+            selects.forEach(id => {
+                const sel = document.getElementById(id);
+                if(sel) {
+                    sel.innerHTML = '<option value="">-- Chọn sản phẩm --</option>' + userRecipes.map(r=>`<option value="${r.id || r.name}">${r.name}</option>`).join('');
+                }
+            });
+        }
+
+        function renderStockTable() {
+            const tbody = document.querySelector("#stockTable tbody");
+            const table = document.getElementById("stockTable");
+            const loading = document.getElementById("stockLoading");
+            
+            if(!tbody) return;
+            
+            if(userIngredients.length === 0) {
+                loading.style.display = "block";
+                table.style.display = "none";
+                loading.innerHTML = "Chưa có nguyên liệu.";
+                return;
+            }
+            
+            loading.style.display = "none";
+            table.style.display = "table";
+            tbody.innerHTML = "";
+            
+            userIngredients.forEach(ing => {
+                const row = tbody.insertRow();
+                row.insertCell(0).innerText = ing.name;
+                row.insertCell(1).innerText = `${ing.quantity.toFixed(2)} ${ing.unit}`;
+            });
+        }
+
+        function renderProfitReport() {
+            const container = document.getElementById("profitReport");
+            if(!container) return;
+            
+            if(userSalesHistory.length === 0) {
+                container.innerHTML = "<p>Chưa có dữ liệu bán hàng.</p>";
+                return;
+            }
+            
+            let totalRevenue = 0, totalCost = 0;
+            let tableHtml = "<table><thead><tr><th>Sản phẩm</th><th>Số lượng</th><th>Giá bán</th><th>Cost/SP</th><th>Lợi nhuận/SP</th><th>Tổng LN</th></tr></thead><tbody>";
+            userSalesHistory.forEach(s => {
+                const profitPerUnit = s.sellPrice - s.costPerUnit;
+                const totalProfit = profitPerUnit * s.quantity;
+                totalRevenue += s.totalRevenue;
+                totalCost += s.totalCost;
+                tableHtml += `<tr><td>${s.productName}</td><td>${s.quantity}</td><td>${s.sellPrice.toLocaleString()}đ</td><td>${s.costPerUnit.toLocaleString()}đ</td><td>${profitPerUnit.toLocaleString()}đ</td><td>${totalProfit.toLocaleString()}đ</td></tr>`;
+            });
+            tableHtml += `</tbody><tfoot><tr><td colspan="4"><strong>Tổng doanh thu</strong></td><td colspan="2"><strong>${totalRevenue.toLocaleString()}đ</strong></td></tr>
+            <tr><td colspan="4"><strong>Tổng chi phí nguyên liệu</strong></td><td colspan="2"><strong>${totalCost.toLocaleString()}đ</strong></td></tr>
+            <tr><td colspan="4"><strong>Lợi nhuận ròng</strong></td><td colspan="2"><strong style="color:#e67e22;">${(totalRevenue-totalCost).toLocaleString()}đ</strong></td></tr></tfoot>`;
+            container.innerHTML = tableHtml;
+        }
+
+        function renderAll() {
+            renderIngredientsTable();
+            renderRecipesList();
+            renderStockTable();
+            updateAllSelects();
+            renderProfitReport();
+        }
+
+        // Event binding
+        function bindEvents() {
+            document.getElementById("addIngredientBtn").onclick = async () => {
+                const name = document.getElementById("ingName").value.trim();
+                const qty = parseFloat(document.getElementById("ingQty").value);
+                const price = parseFloat(document.getElementById("ingPrice").value);
+                const unit = document.getElementById("ingUnit").value;
+                if(!name || isNaN(qty) || isNaN(price) || qty<=0 || price<=0) {
+                    alert("Vui lòng nhập đầy đủ tên, số lượng (>0) và giá tiền (>0)");
+                    return;
+                }
+                addIngredient(name, qty, price, unit);
+                renderIngredientsTable();
+                renderStockTable();
+                updateAllSelects();
+                renderRecipesList();
+                document.getElementById("ingName").value = "";
+                document.getElementById("ingQty").value = "";
+                document.getElementById("ingPrice").value = "";
+            };
+
+            document.getElementById("saveRecipeBtn").onclick = async () => {
+                const name = document.getElementById("productName").value.trim();
+                let ingJson = document.getElementById("recipeIngredients").value.trim();
+                if(!name) { alert("Nhập tên sản phẩm"); return; }
+                try {
+                    let ingredientsObj = JSON.parse(ingJson);
+                    userRecipes.push({ id: Date.now(), name: name, ingredients: ingredientsObj });
+                    await saveAllData();
+                    renderRecipesList();
+                    updateAllSelects();
+                    document.getElementById("productName").value = "";
+                    document.getElementById("recipeIngredients").value = "";
+                } catch(e) { alert("Lỗi: Nhập đúng JSON. Ví dụ: {\"Bột mì\": 50, \"Đường\": 20}"); }
+            };
+
+            document.getElementById("calcNeedBtn").onclick = () => {
+                const recipeId = document.getElementById("prodSelect").value;
+                const qty = parseInt(document.getElementById("prodQty").value);
+                if(!recipeId || qty<1) { alert("Chọn sản phẩm và số lượng hợp lệ"); return; }
+                const recipe = userRecipes.find(r => (r.id || r.name) == recipeId);
+                if(!recipe) return;
+                const needed = {};
+                for(let [ing, gram] of Object.entries(recipe.ingredients)) needed[ing] = gram * qty;
+                let warningHtml = "<strong>📋 Nguyên liệu cần:</strong><br/>";
+                for(let [ing, need] of Object.entries(needed)) {
+                    const stock = userIngredients.find(i=>i.name===ing);
+                    const current = stock ? stock.quantity : 0;
+                    const status = (current >= need) ? "✅ Đủ" : `❌ Thiếu ${(need-current).toFixed(1)}g`;
+                    warningHtml += `${ing}: cần ${need.toFixed(1)}g, hiện có ${current.toFixed(1)}g → ${status}<br/>`;
+                }
+                const resultDiv = document.getElementById("needResult");
+                resultDiv.innerHTML = warningHtml;
+                resultDiv.style.display = "block";
+            };
+
+            document.getElementById("confirmDeductionBtn").onclick = async () => {
+                const recipeId = document.getElementById("prodSelect").value;
+                const qty = parseInt(document.getElementById("prodQty").value);
+                if(!recipeId || qty<1) { alert("Chọn sản phẩm & số lượng"); return; }
+                const recipe = userRecipes.find(r => (r.id || r.name) == recipeId);
+                if(!recipe) return;
+                const result = produceProduct(recipe, qty);
+                if(!result.success) {
+                    let msg = "Không đủ nguyên liệu để sản xuất:<br/>";
+                    result.shortages.forEach(s => msg += `- ${s.name}: cần ${s.need.toFixed(1)}g, thiếu ${(s.need - s.current).toFixed(1)}g<br/>`);
+                    alert(msg);
+                } else {
+                    alert(`✅ Đã sản xuất thành công ${qty} ${recipe.name}`);
+                    renderIngredientsTable();
+                    renderStockTable();
+                    renderRecipesList();
+                }
+            };
+
+            document.getElementById("calcMaxBtn").onclick = () => {
+                const recipeId = document.getElementById("maxProdSelect").value;
+                if(!recipeId) { alert("Chọn sản phẩm"); return; }
+                const recipe = userRecipes.find(r => (r.id || r.name) == recipeId);
+                const max = maxPossible(recipe);
+                document.getElementById("maxResult").innerHTML = `📦 Với nguyên liệu hiện tại, tối đa có thể sản xuất <strong>${max}</strong> cái "${recipe.name}".`;
+            };
+
+            document.getElementById("recordSaleBtn").onclick = async () => {
+                const recipeId = document.getElementById("profitProductSelect").value;
+                const qty = parseInt(document.getElementById("soldQty").value);
+                const sellPrice = parseFloat(document.getElementById("sellPrice").value);
+                if(!recipeId || qty<1 || isNaN(sellPrice) || sellPrice<=0) { alert("Chọn sản phẩm, số lượng, giá bán hợp lệ"); return; }
+                const recipe = userRecipes.find(r => (r.id || r.name) == recipeId);
+                const costPerUnit = getProductCost(recipe);
+                if(costPerUnit===null) { alert("Không thể tính cost do thiếu nguyên liệu trong công thức"); return; }
+                const totalRevenue = sellPrice * qty;
+                const totalCost = costPerUnit * qty;
+                userSalesHistory.push({
+                    productName: recipe.name,
+                    quantity: qty,
+                    sellPrice: sellPrice,
+                    costPerUnit: costPerUnit,
+                    totalRevenue: totalRevenue,
+                    totalCost: totalCost,
+                    date: new Date().toLocaleString()
+                });
+                await saveAllData();
+                renderProfitReport();
+                alert(`Đã ghi nhận bán ${qty} ${recipe.name} - Doanh thu: ${totalRevenue.toLocaleString()}đ`);
+            };
+
+            document.getElementById("resetSalesBtn").onclick = async () => { 
+                if(confirm("Xóa toàn bộ lịch sử bán?")) { 
+                    userSalesHistory=[]; 
+                    await saveAllData(); 
+                    renderProfitReport(); 
+                } 
+            };
+            
+            document.getElementById("resetDemoBtn").onclick = async () => { 
+                if(confirm("Reset toàn bộ dữ liệu về mẫu ban đầu?")) { 
+                    userIngredients = getSampleIngredients();
+                    userRecipes = getSampleRecipes();
+                    userSalesHistory = [];
+                    await saveAllData();
+                    renderAll();
+                } 
+            };
+
+            // Tab switching
+            document.querySelectorAll(".tab-btn").forEach(btn => {
+                btn.addEventListener("click", () => {
+                    document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+                    btn.classList.add("active");
+                    const tabId = btn.getAttribute("data-tab");
+                    document.querySelectorAll(".tab-pane").forEach(pane=>pane.classList.remove("active"));
+                    document.getElementById(tabId).classList.add("active");
+                    renderProfitReport();
+                    renderStockTable();
+                });
+            });
+        }
+
+        // Check auth state
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+                loadUserData(user);
+            } else {
+                document.getElementById('loginScreen').style.display = 'flex';
+                document.getElementById('mainApp').style.display = 'none';
+            }
+        });
+
+        bindEvents();
+    </script>
+</body>
+</html>
