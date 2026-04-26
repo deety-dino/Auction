@@ -1,0 +1,130 @@
+.main-root {
+    -fx-font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    -fx-background-color: linear-gradient(to bottom right, #fef9e6 0%, #fff5e8 100%);
+}
+
+.container {
+    -fx-max-width: 1300;
+}
+
+.app-header {
+    -fx-padding: 0 0 15 0;
+    -fx-border-color: transparent transparent #f0d5b0 transparent;
+    -fx-border-width: 0 0 2 0;
+}
+
+.app-title {
+    -fx-font-size: 30px;
+    -fx-text-fill: #c47a44;
+    -fx-font-weight: 700;
+}
+
+.sub {
+    -fx-text-fill: #b97f55;
+    -fx-font-style: italic;
+}
+
+.user-info {
+    -fx-alignment: center;
+}
+
+.logout-btn {
+    -fx-background-color: #e74c3c;
+    -fx-text-fill: white;
+    -fx-background-radius: 40;
+    -fx-padding: 8 20;
+    -fx-font-size: 14px;
+    -fx-font-weight: 700;
+}
+
+.logout-btn:hover {
+    -fx-background-color: #c0392b;
+}
+
+.tabs {
+    -fx-padding: 0 0 10 0;
+    -fx-border-color: transparent transparent #f0d5b0 transparent;
+    -fx-border-width: 0 0 2 0;
+}
+
+.tab-btn {
+    -fx-background-color: #f7e5cf;
+    -fx-text-fill: #7b4a2e;
+    -fx-background-radius: 30;
+    -fx-padding: 10 20;
+    -fx-font-weight: 700;
+    -fx-cursor: hand;
+}
+
+.tab-btn-active,
+.tab-btn:selected {
+    -fx-background-color: #c47a44;
+    -fx-text-fill: white;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 8, 0, 0, 4);
+}
+
+.card {
+    -fx-background-color: white;
+    -fx-background-radius: 24;
+    -fx-padding: 20;
+    -fx-border-color: #ffe2c4;
+    -fx-border-radius: 24;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 20, 0, 0, 8);
+}
+
+.card-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #5a3a28;
+}
+
+.text-field,
+.text-area,
+.combo-box,
+.table-view {
+    -fx-background-color: #fffcf8;
+    -fx-background-radius: 16;
+    -fx-border-color: #e2c7aa;
+    -fx-border-radius: 16;
+}
+
+.text-field,
+.combo-box {
+    -fx-padding: 10 14;
+}
+
+.button {
+    -fx-background-color: #c47a44;
+    -fx-text-fill: white;
+    -fx-background-radius: 40;
+    -fx-padding: 10 20;
+    -fx-font-weight: 700;
+    -fx-cursor: hand;
+}
+
+.button:hover {
+    -fx-background-color: #a55d2e;
+}
+
+.btn-outline {
+    -fx-background-color: transparent;
+    -fx-text-fill: #c47a44;
+    -fx-border-color: #c47a44;
+    -fx-border-radius: 40;
+    -fx-background-radius: 40;
+}
+
+.btn-outline:hover {
+    -fx-background-color: #c47a44;
+    -fx-text-fill: white;
+}
+
+.loading {
+    -fx-text-fill: #b97f55;
+    -fx-font-style: italic;
+}
+
+.flex-btns {
+    -fx-alignment: center-left;
+}
+
