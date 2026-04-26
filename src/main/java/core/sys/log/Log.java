@@ -1,6 +1,5 @@
 package core.sys.log;
 
-import core.dao.DBUser;
 import core.dao.JDBC;
 import core.dao.Query.QueryExecutor;
 
@@ -10,12 +9,15 @@ public class Log {
     private final Login login;
     private final Signup signup;
 
-    public Log(String databaseName) {
+    public Log(String databasePath) {
         JDBC jdbc = JDBC.getInstance();
         try {
-            jdbc.connect(databaseName);
+            jdbc.connect(databasePath);
         } catch (SQLException exception) {
-            throw new IllegalStateException("Unable to connect to database: username: "+ DBUser.getInstance().getUsername()+ " password: " + DBUser.getInstance().getPassword(), exception);
+            throw new IllegalStateException(
+                "Unable to connect to SQLite database at: " + jdbc.getResolvedDatabasePath(),
+                exception
+            );
         }
 
         AuthRepository repository = new AuthRepository(new QueryExecutor(jdbc));

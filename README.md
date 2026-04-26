@@ -17,19 +17,15 @@ This project now includes a reusable query package at `src/main/java/core/dao/Qu
 
 Connection is managed by `core.dao.JDBC` and uses:
 
-- Base URL: `jdbc:mysql://localhost:3306/`
-- Credentials from `core.dao.DBUser`
-- Optional database name via `JDBC.connect("database_name")`
+- SQLite URL format: `jdbc:sqlite:<absolute_path_to_db_file>`
+- Default database file path: `data/auction.db` (inside project folder)
+- First-run schema creation via `JDBC.initializeDatabase()` (called automatically by `connect`)
 
 ## Quick usage
 
 ```java
-DBUser dbUser = DBUser.getInstance();
-dbUser.setUsername("root");
-dbUser.setPassword("secret");
-
 JDBC jdbc = JDBC.getInstance();
-jdbc.connect("auction_db");
+jdbc.connect("data/auction.db");
 
 QueryExecutor executor = new QueryExecutor(jdbc);
 
@@ -82,11 +78,7 @@ Signup uses a chain of validators in order:
 ### Example
 
 ```java
-DBUser dbUser = DBUser.getInstance();
-dbUser.setUsername("root");
-dbUser.setPassword("secret");
-
-Log auth = new Log("auction_db");
+Log auth = new Log("data/auction.db");
 
 AuthResult signupResult = auth.signup("alice", "alice@example.com", "Password1");
 AuthResult loginResult = auth.login("alice", "Password1");
@@ -94,7 +86,7 @@ AuthResult loginResult = auth.login("alice", "Password1");
 
 ### Database table expectation
 
-Current SQL expects a `users` table with at least:
+Current SQL expects a `users` table with at least (auto-created for SQLite):
 
 - `user_id` (int, primary key)
 - `username` (varchar, unique)

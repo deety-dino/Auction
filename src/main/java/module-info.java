@@ -6,10 +6,9 @@ module fxml.auction {
     requires org.controlsfx.controls;
     requires org.kordamp.bootstrapfx.core;
     requires eu.hansolo.tilesfx;
-    requires com.almasb.fxgl.all;
     requires java.sql;
     requires jdk.jsobject;
-    requires mysql.connector.j;
+    requires org.xerial.sqlitejdbc;
 
     opens fxml.auction to javafx.fxml;
     exports fxml.auction;

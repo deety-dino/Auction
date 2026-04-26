@@ -18,7 +18,7 @@ public class AuthRepository {
         List<AuthUser> rows = queryExecutor.execute(QueryFactory.select(
                 "SELECT user_id, username, email, password FROM users WHERE username = ? LIMIT 1",
                 resultSet -> new AuthUser(
-                        resultSet.getInt("user_id"),
+                        resultSet.getString("user_id"),
                         resultSet.getString("username"),
                         resultSet.getString("email"),
                         resultSet.getString("password")

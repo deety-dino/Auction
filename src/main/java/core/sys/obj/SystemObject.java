@@ -2,9 +2,9 @@ package core.sys.obj;
 
 public abstract class SystemObject {
     private String name;
-    private Integer id;
+    private String id;
 
-    public SystemObject(String name, Integer id) {
+    public SystemObject(String name, String id) {
         this.name = name;
         this.id = id;
     }
@@ -14,10 +14,10 @@ public abstract class SystemObject {
     public void setName(String name) {
         this.name = name;
     }
-    public Integer getId() {
+    public String getId() {
         return id;
     }
-    public void setId(Integer id) {
+    public void setId(String id) {
         this.id = id;
     }
 

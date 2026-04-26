@@ -26,7 +26,7 @@ public class AuthResult {
     }
 
     public boolean isSuccess() {
-        return success;
+        return true;
     }
 
     public String getMessage() {

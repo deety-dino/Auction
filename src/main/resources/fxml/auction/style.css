@@ -1,0 +1,101 @@
+.app-root {
+    -fx-font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    -fx-background-color: linear-gradient(to bottom right, #fef9e6 0%, #fff5e8 100%);
+}
+
+.text-field,
+.password-field {
+    -fx-background-color: #fffcf8;
+    -fx-background-radius: 16;
+    -fx-border-color: #e2c7aa;
+    -fx-border-radius: 16;
+    -fx-text-fill: #3e2a1f;
+    -fx-prompt-text-fill: #b08a67;
+    -fx-padding: 10 14;
+    -fx-font-size: 14px;
+}
+
+.button {
+    -fx-background-color: #c47a44;
+    -fx-text-fill: white;
+    -fx-background-radius: 40;
+    -fx-padding: 10 20;
+    -fx-font-weight: 700;
+    -fx-cursor: hand;
+}
+
+.button:hover {
+    -fx-background-color: #a55d2e;
+}
+
+.button:disabled {
+    -fx-background-color: #ccc;
+}
+
+.btn-outline {
+    -fx-background-color: transparent;
+    -fx-border-color: #c47a44;
+    -fx-border-radius: 40;
+    -fx-background-radius: 40;
+    -fx-text-fill: #c47a44;
+}
+
+.btn-outline:hover {
+    -fx-background-color: #c47a44;
+    -fx-text-fill: white;
+}
+
+.login-screen {
+    -fx-background-color: linear-gradient(to bottom right, #c47a44 0%, #8b5a2e 100%);
+}
+
+.login-box {
+    -fx-background-color: white;
+    -fx-background-radius: 32;
+    -fx-padding: 40;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 40, 0, 0, 20);
+}
+
+.login-title {
+    -fx-text-fill: #c47a44;
+    -fx-font-size: 30px;
+    -fx-font-weight: 700;
+    -fx-alignment: center;
+}
+
+.login-sub {
+    -fx-text-fill: #7b4a2e;
+    -fx-font-size: 13px;
+}
+
+.separator {
+    -fx-background-color: #f0d5b0;
+}
+
+.flex-btns {
+    -fx-alignment: center;
+    -fx-padding: 4 0 0 0;
+}
+
+.switch-mode {
+    -fx-text-fill: #7b4a2e;
+    -fx-underline: false;
+    -fx-font-size: 13px;
+}
+
+.switch-mode:hover {
+    -fx-underline: true;
+}
+
+.status-label {
+    -fx-text-fill: #7b4a2e;
+    -fx-font-size: 13px;
+}
+
+.status-success {
+    -fx-text-fill: #27ae60;
+}
+
+.status-error {
+    -fx-text-fill: #e74c3c;
+}
